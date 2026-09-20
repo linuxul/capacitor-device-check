@@ -35,6 +35,7 @@ try {
 
 - If you are using Capacitor 5 use version 5.x
 - If you are using Capacitor 6 use version 6.x
+- This branch requires the forked Capacitor 8 runtime (Android in Kotlin, iOS in Swift), iOS 17 and Android 13 (API 33)
 
 ## API
 

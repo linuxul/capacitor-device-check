@@ -11,7 +11,7 @@ public class CapacitorDeviceCheckPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "CapacitorDeviceCheckPlugin"
     public let jsName = "CapacitorDeviceCheck"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "generateToken", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "generateToken", returnType: .promise)
     ]
     @objc func generateToken(_ call: CAPPluginCall) {
         guard DCDevice.current.isSupported == true else {

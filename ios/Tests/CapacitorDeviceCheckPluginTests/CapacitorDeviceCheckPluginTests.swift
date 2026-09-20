@@ -2,14 +2,14 @@ import XCTest
 @testable import CapacitorDeviceCheckPlugin
 
 class CapacitorDeviceCheckTests: XCTestCase {
-    func testEcho() {
-        // This is an example of a functional test case for a plugin.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testPluginRegistration() {
+        let plugin = CapacitorDeviceCheckPlugin()
 
-        let implementation = CapacitorDeviceCheck()
-        let value = "Hello, World!"
-        let result = implementation.echo(value)
-
-        XCTAssertEqual(value, result)
+        XCTAssertEqual("CapacitorDeviceCheckPlugin", plugin.identifier)
+        XCTAssertEqual("CapacitorDeviceCheck", plugin.jsName)
+        XCTAssertEqual(["generateToken"], plugin.pluginMethods.map { $0.name })
+        for method in plugin.pluginMethods {
+            XCTAssertTrue(plugin.responds(to: method.selector), "\(method.name) is not exposed to Objective-C")
+        }
     }
 }
