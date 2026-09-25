@@ -11,24 +11,26 @@ public class CapacitorDeviceCheckPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "CapacitorDeviceCheckPlugin"
     public let jsName = "CapacitorDeviceCheck"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "generateToken", returnType: .promise)
+        .async("generateToken", CapacitorDeviceCheckPlugin.generateToken)
     ]
-    @objc func generateToken(_ call: CAPPluginCall) {
+
+    // generateToken touches no UIKit state, so it does not need the main actor.
+    func generateToken(_ call: CAPPluginCall) async throws -> JSObject {
         guard DCDevice.current.isSupported == true else {
-            call.reject("DeviceCheck is not supported on this device")
-            return
+            throw CAPPluginError("DeviceCheck is not supported on this device")
         }
-        DCDevice.current.generateToken { tokenData, error in
-            guard error == nil,
-                  let deviceToken = tokenData?.base64EncodedString() else {
-                switch error {
-                case .none: call.reject("DeviceCheck token encoding failed")
-                case .some(let error):
-                    call.reject("DeviceCheck error:\(error.localizedDescription)")
+        let deviceToken: String = try await withCheckedThrowingContinuation { continuation in
+            // DeviceCheck calls the handler once.
+            DCDevice.current.generateToken { tokenData, error in
+                if let error {
+                    continuation.resume(throwing: CAPPluginError("DeviceCheck error:\(error.localizedDescription)", underlyingError: error))
+                } else if let deviceToken = tokenData?.base64EncodedString() {
+                    continuation.resume(returning: deviceToken)
+                } else {
+                    continuation.resume(throwing: CAPPluginError("DeviceCheck token encoding failed"))
                 }
-                return
             }
-            call.resolve(["token": deviceToken])
         }
+        return ["token": deviceToken]
     }
 }
